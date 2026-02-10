@@ -24,8 +24,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-      - name: Terraform State List
-        run: terraform state list
       - name: Peek at State
         run: terraform state list
 
