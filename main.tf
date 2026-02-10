@@ -150,5 +150,11 @@ terraform {
     bucket = "hard05-terraform-state-bucket"
     key    = "state/terraform.tfstate"
     region = "us-east-1"
-  }
+}
+resource "aws_s3_bucket" "test_bucket" {
+  bucket = "rag-ai-test-bucket-${random_id.id.hex}"
+}
+
+resource "random_id" "id" {
+  byte_length = 4
 }
