@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./03-Terraform-Landing-Zone
-
+        working-directory: 03-Terraform-Landing-Zone
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
