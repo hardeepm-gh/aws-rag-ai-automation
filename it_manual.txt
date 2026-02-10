@@ -1,0 +1,19 @@
+                                  Incident Response Policy
+
+The incident response policy is part of an organization’s Business Continuity Plan. It outlines an organization’s response to an information security incident. The incident response policy should be documented separately from the Disaster Recovery Plan, as it focuses on procedures following a breach of data or other security incident.
+
+
+The policy should include information about the incident response team, personnel responsible for testing to the policy, the role of each team member, and actions, means, and resources used to identify and recover compromised data. Phases of incident response include:
+
+
+Preparation
+Identification
+Containment
+Eradication
+Recover
+Post- Incident
+
+The incident response policy also needs to identify the incident response team and information about the system such as network and data flow diagrams, hardware inventory, and logging data. Incident handling procedures should be detailed in the policy. One of the most crucial aspects of this policy is educating users on who to report to in the case of a data breach or other security incident. Management should always assess and monitor performance, ensure cooperation between staff, and regularly test the incident response plan.
+
+
+

@@ -1,0 +1,18 @@
+ai_env/
+venv/
+.venv/
+__pycache__/
+.terraform/
+*.tfstate
+*.tfstate.backup
+.DS_Store# Local terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# MacOS files
+.DS_Store
+ai_env/
+.terraform/
+*.tfstate*
