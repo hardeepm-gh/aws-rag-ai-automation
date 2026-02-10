@@ -10,12 +10,11 @@ jobs:
   terraform:
     name: "Terraform Action"
     runs-on: ubuntu-latest
-    # <--- NO DEFAULTS BLOCK HERE ANYMORE
+    # Removed the defaults/run/working-directory block from here
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      # ... rest of the steps ...
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
