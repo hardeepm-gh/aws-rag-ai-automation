@@ -137,4 +137,3 @@ resource "aws_iam_role_policy_attachment" "ai_attach" {
 }
 
 # --- 5. TEST RESOURCES ---
-resource "aws
