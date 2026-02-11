@@ -1,52 +1,62 @@
-# --- PROVIDER CONFIGURATION ---
-provider "aws" {
-  region = "us-east-1"
+# --- 1. TERRAFORM & PROVIDER CONFIG ---
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
 }
 
-# --- 1. NETWORK (VPC) ---
+provider "aws" {
+  region = "us-east-1" 
+}
+
+# --- 2. RANDOM SUFFIX ---
+# This ensures unique names for S3 and IAM to avoid "AlreadyExists" errors
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  upper   = false
+}
+
+# --- 3. NETWORKING (VPC) ---
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.5.0"
 
-  name = "hardeep-enterprise-vpc"
+  name = "hardeep-enterprise-vpc-${random_string.suffix.result}"
   cidr = "10.0.0.0/16"
 
   azs             = ["us-east-1a", "us-east-1b"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
+  database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
 
-  enable_nat_gateway   = true
-  single_nat_gateway   = true 
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Environment = "Dev"
-    Project     = "Cloud-Transformation"
-    ManagedBy   = "Terraform"
-  }
+  enable_nat_gateway = true
+  single_nat_gateway = true # Keeps us under the Elastic IP limit
 }
 
-# --- 2. DATABASE (RDS) ---
-resource "aws_db_subnet_group" "database" {
-  name       = "hardeep-db-subnet-group"
-  subnet_ids = module.vpc.public_subnets
-
-  tags = {
-    Name = "My DB Subnet Group"
-  }
-}
-
-resource "aws_security_group" "db_sg" {
-  name        = "database-security-group"
-  vpc_id      = module.vpc.vpc_id
+# --- 4. DATABASE (RDS POSTGRES) ---
+resource "aws_security_group" "rds_sg" {
+  name   = "rds-sg-${random_string.suffix.result}"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
+}
+
+resource "aws_db_subnet_group" "database" {
+  name       = "db-subnet-group-${random_string.suffix.result}"
+  subnet_ids = module.vpc.database_subnets
 }
 
 resource "aws_db_instance" "app_db" {
@@ -54,47 +64,24 @@ resource "aws_db_instance" "app_db" {
   engine                 = "postgres"
   engine_version         = "15"
   instance_class         = "db.t3.micro"
-  db_name                = "it_knowledge_db"
-  username               = "hardeep_admin"
-  password               = "SecurePassword123!" 
+  db_name                = "ragdb"
+  username               = "dbadmin"
+  password               = "HardeepSecurePass2026!"
   db_subnet_group_name   = aws_db_subnet_group.database.name
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
-  publicly_accessible    = true
 }
 
-# --- 3. STORAGE (S3 KNOWLEDGE LAKE) ---
+# --- 5. STORAGE (S3 KNOWLEDGE LAKE) ---
 resource "aws_s3_bucket" "knowledge_lake" {
-# This will result in names like: hardeep-lake-a1b2
-  bucket = "hardeep-lake-${random_string.suffix.result}"
+  bucket        = "hardeep-rag-lake-${random_string.suffix.result}"
   force_destroy = true 
-
-  tags = {
-    Name        = "IT-Knowledge-Lake"
-    Environment = "Dev"
-  }
 }
 
-resource "aws_s3_bucket_versioning" "lake_versioning" {
-  bucket = aws_s3_bucket.knowledge_lake.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "lake_security" {
-  bucket = aws_s3_bucket.knowledge_lake.id
-  block_public_acls       = true
-  block_public_policy      = true
-  ignore_public_acls       = true
-  restrict_public_buckets  = true
-}
-
-# --- 4. PERMISSIONS (IAM) ---
+# --- 6. IDENTITY & PERMISSIONS (IAM) ---
 resource "aws_iam_role" "ai_assistant_role" {
   name = "it-assistant-role-${random_string.suffix.result}"
 
-  # THIS IS CORRECT HERE
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -104,53 +91,40 @@ resource "aws_iam_role" "ai_assistant_role" {
     }]
   })
 }
-# THE ROLE (This one uses assume_role_policy)
-resource "aws_iam_role" "ai_assistant_role" {
-  name = "it-assistant-role-${random_string.suffix.result}"
 
-  assume_role_policy = jsonencode({
+resource "aws_iam_policy" "ai_assistant_policy" {
+  name = "ai-assistant-perm-${random_string.suffix.result}"
+
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com" # Or bedrock.amazonaws.com depending on your use case
-        }
-      }
-    ]
-  })
-}
-
-# THE POLICY (This one uses "policy =", NOT "assume_role_policy")
-resource "aws_iam_policy" "ai_assistant_policy" {
-  name = "ai-assistant-perm-${random_string.suffix.result}"
-  
-  # CHANGE THIS LINE IF IT SAYS 'assume_role_policy'
-  policy = jsonencode({ 
-    Version = "2012-10-17"
-    Statement = [{
-      Action   = ["s3:GetObject", "s3:ListBucket"]
-      Effect   = "Allow"
-      Resource = "*"
-    }]
-  })
-}
-        Action   = ["rds-db:connect"]
+        Action   = ["s3:GetObject", "s3:ListBucket"]
         Effect   = "Allow"
-        Resource = [aws_db_instance.app_db.arn]
+        Resource = [
+          aws_s3_bucket.knowledge_lake.arn,
+          "${aws_s3_bucket.knowledge_lake.arn}/*"
+        ]
+      },
+      {
+        Action   = ["bedrock:InvokeModel"]
+        Effect   = "Allow"
+        Resource = "*"
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ai_attach" {
+resource "aws_iam_role_policy_attachment" "attach_perms" {
   role       = aws_iam_role.ai_assistant_role.name
   policy_arn = aws_iam_policy.ai_assistant_policy.arn
 }
 
-resource "random_string" "suffix" {
-  length  = 4
-  special = false
-  upper   = false
+# --- 7. OUTPUTS ---
+output "rds_endpoint" {
+  value = aws_db_instance.app_db.endpoint
+}
+
+output "s3_bucket_name" {
+  value = aws_s3_bucket.knowledge_lake.id
 }
