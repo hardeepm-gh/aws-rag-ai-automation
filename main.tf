@@ -65,7 +65,7 @@ resource "aws_db_instance" "app_db" {
 
 # --- 3. STORAGE (S3 KNOWLEDGE LAKE) ---
 resource "aws_s3_bucket" "knowledge_lake" {
-  bucket        = "hardeep-it-assistant-knowledge-lake-dev-01"
+  bucket        = "hardeep-it-assistant-knowledge-lake-v2"
   force_destroy = true 
 
   tags = {
@@ -91,7 +91,7 @@ resource "aws_s3_bucket_public_access_block" "lake_security" {
 
 # --- 4. PERMISSIONS (IAM) ---
 resource "aws_iam_role" "ai_assistant_role" {
-  name = "it-knowledge-assistant-role"
+  name = "it-knowledge-assistant-role-v2"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -108,7 +108,7 @@ resource "aws_iam_role" "ai_assistant_role" {
 }
 
 resource "aws_iam_policy" "ai_assistant_policy" {
-  name        = "ai-assistant-permissions"
+  name        = "ai-assistant-permissions-v2"
   description = "Allows reading from S3 Knowledge Lake and connecting to RDS"
 
   policy = jsonencode({
