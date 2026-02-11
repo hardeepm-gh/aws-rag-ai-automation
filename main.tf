@@ -93,22 +93,17 @@ resource "aws_s3_bucket_public_access_block" "lake_security" {
 # --- 4. PERMISSIONS (IAM) ---
 resource "aws_iam_role" "ai_assistant_role" {
   name = "it-assistant-role-${random_string.suffix.result}"
-}
 
+  # THIS IS CORRECT HERE
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com" # Or bedrock.amazonaws.com depending on your use case
-        }
-      }
-    ]
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
   })
 }
-
 # THE ROLE (This one uses assume_role_policy)
 resource "aws_iam_role" "ai_assistant_role" {
   name = "it-assistant-role-${random_string.suffix.result}"
@@ -131,15 +126,14 @@ resource "aws_iam_role" "ai_assistant_role" {
 resource "aws_iam_policy" "ai_assistant_policy" {
   name = "ai-assistant-perm-${random_string.suffix.result}"
   
-  policy = jsonencode({  # <--- Make sure this says 'policy', not 'assume_role_policy'
+  # CHANGE THIS LINE IF IT SAYS 'assume_role_policy'
+  policy = jsonencode({ 
     Version = "2012-10-17"
-    Statement = [
-      {
-        Action   = ["s3:GetObject", "s3:ListBucket"]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
+    Statement = [{
+      Action   = ["s3:GetObject", "s3:ListBucket"]
+      Effect   = "Allow"
+      Resource = "*"
+    }]
   })
 }
         Action   = ["rds-db:connect"]
