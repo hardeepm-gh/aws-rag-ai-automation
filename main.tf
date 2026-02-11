@@ -65,7 +65,8 @@ resource "aws_db_instance" "app_db" {
 
 # --- 3. STORAGE (S3 KNOWLEDGE LAKE) ---
 resource "aws_s3_bucket" "knowledge_lake" {
-  bucket        = "hardeep-it-assistant-knowledge-lake-v2"
+# This will result in names like: hardeep-lake-a1b2
+  bucket = "hardeep-lake-${random_string.suffix.result}"
   force_destroy = true 
 
   tags = {
@@ -91,7 +92,8 @@ resource "aws_s3_bucket_public_access_block" "lake_security" {
 
 # --- 4. PERMISSIONS (IAM) ---
 resource "aws_iam_role" "ai_assistant_role" {
-  name = "it-knowledge-assistant-role-v2"
+  name = "it-assistant-role-${random_string.suffix.result}"
+}
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -108,19 +110,18 @@ resource "aws_iam_role" "ai_assistant_role" {
 }
 
 resource "aws_iam_policy" "ai_assistant_policy" {
-  name        = "ai-assistant-permissions-v2"
+  name = "ai-assistant-perm-${random_string.suffix.result}"
+}
   description = "Allows reading from S3 Knowledge Lake and connecting to RDS"
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action   = ["s3:GetObject", "s3:ListBucket"]
         Effect   = "Allow"
-        Resource = [
-          aws_s3_bucket.knowledge_lake.arn,
-          "${aws_s3_bucket.knowledge_lake.arn}/*"
-        ]
+        resource "aws_s3_bucket" "knowledge_lake" {
+  	  bucket = "hardeep-rag-lake-${random_string.suffix.result}"
+}
       },
       {
         Action   = ["rds-db:connect"]
@@ -136,4 +137,8 @@ resource "aws_iam_role_policy_attachment" "ai_attach" {
   policy_arn = aws_iam_policy.ai_assistant_policy.arn
 }
 
-# --- 5. TEST RESOURCES ---
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  upper   = false
+}
