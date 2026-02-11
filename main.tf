@@ -102,28 +102,46 @@ resource "aws_iam_role" "ai_assistant_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "lambda.amazonaws.com"
+          Service = "ec2.amazonaws.com" # Or bedrock.amazonaws.com depending on your use case
         }
-      },
+      }
     ]
   })
 }
 
+# THE ROLE (This one uses assume_role_policy)
+resource "aws_iam_role" "ai_assistant_role" {
+  name = "it-assistant-role-${random_string.suffix.result}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com" # Or bedrock.amazonaws.com depending on your use case
+        }
+      }
+    ]
+  })
+}
+
+# THE POLICY (This one uses "policy =", NOT "assume_role_policy")
 resource "aws_iam_policy" "ai_assistant_policy" {
   name = "ai-assistant-perm-${random_string.suffix.result}"
-}
-  description = "Allows reading from S3 Knowledge Lake and connecting to RDS"
-  policy = jsonencode({
+  
+  policy = jsonencode({  # <--- Make sure this says 'policy', not 'assume_role_policy'
     Version = "2012-10-17"
     Statement = [
       {
         Action   = ["s3:GetObject", "s3:ListBucket"]
         Effect   = "Allow"
-        resource "aws_s3_bucket" "knowledge_lake" {
-  	  bucket = "hardeep-rag-lake-${random_string.suffix.result}"
+        Resource = "*"
+      }
+    ]
+  })
 }
-      },
-      {
         Action   = ["rds-db:connect"]
         Effect   = "Allow"
         Resource = [aws_db_instance.app_db.arn]
