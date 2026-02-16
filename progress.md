@@ -1,17 +1,14 @@
-# 🚀 Terraform 30-Day Challenge: Progress Log
+## Day 21: Modularizing the AWS Landing Zone
 
-## 📅 Day 20: The Modular Architecture & The Great Recovery
-**Date:** February 13, 2026
-**Status:** COMPLETED ✅
+**Tasks Completed:**
+- [x] Refactored monolithic Terraform code into `vpc` and `ec2` modules.
+- [x] Resolved Multi-AZ RDS Subnet Group errors by implementing `count` and dynamic Availability Zone lookups.
+- [x] Established cross-module data flow using Outputs and Variables.
+- [x] Verified successful EC2 deployment with dynamic AMI discovery.
 
-### 🏗️ Infrastructure Changes
-- **Modularized VPC:** Refactored a flat main.tf into a reusable modules/vpc/ directory.
-- **Output Handoffs:** Implemented module outputs to pass the vpc_id to the Root module.
-- **Resource Cleanup:** Verified AWS account state via CLI to ensure $0 spend.
+**Key Learnings:**
+- Mastered the "Output Handshake": passing data from a network module to a compute module.
+- Understanding the strict Multi-AZ requirements for AWS RDS (minimum 2 AZs).
+- Using `terraform init` to re-index renamed or newly added local modules.
 
-### 🧠 Key Learnings
-- **Encapsulation:** Child modules are private; outputs are the "public API."
-- **Disaster Recovery:** Recovered from a Terraform Crash by nuking local state metadata.
-
-### 🎯 Next Goal
-- **Day 21 (Monday):** Create a Compute Module (EC2) and practice Module Composition.
+**Status:** Infrastructure destroyed to save costs; ready for Day 22 RDS deployment.
