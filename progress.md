@@ -1,14 +1,15 @@
-## Day 21: Modularizing the AWS Landing Zone
+## Day 22: Multi-Tier Modular Infrastructure & RDS
 
 **Tasks Completed:**
-- [x] Refactored monolithic Terraform code into `vpc` and `ec2` modules.
-- [x] Resolved Multi-AZ RDS Subnet Group errors by implementing `count` and dynamic Availability Zone lookups.
-- [x] Established cross-module data flow using Outputs and Variables.
-- [x] Verified successful EC2 deployment with dynamic AMI discovery.
+- [x] Created a dedicated `rds` module for managed database deployment.
+- [x] Implemented **Security Group Nesting**: RDS now only accepts traffic from the Web Server's Security Group ID.
+- [x] Fixed "Race Condition" errors by using explicit output-to-input handshakes between VPC and RDS modules.
+- [x] Resolved plural/singular attribute mismatches in subnet list exports.
+- [x] Verified full deployment of VPC, EC2, and RDS using a single `terraform apply`.
 
 **Key Learnings:**
-- Mastered the "Output Handshake": passing data from a network module to a compute module.
-- Understanding the strict Multi-AZ requirements for AWS RDS (minimum 2 AZs).
-- Using `terraform init` to re-index renamed or newly added local modules.
+- **Dependency Mapping:** Learned how Terraform uses output references (e.g., `module.vpc.db_subnet_group_name`) to determine the order of resource creation.
+- **Security Best Practices:** Moving from IP-based firewall rules to Resource-based (Security Group) rules.
+- **RDS Requirements:** Understanding that RDS Subnet Groups require a list of IDs across at least two Availability Zones.
 
-**Status:** Infrastructure destroyed to save costs; ready for Day 22 RDS deployment.
+**Status:** Infrastructure destroyed; GitHub synced. Ready for Day 23: Secrets Management.
