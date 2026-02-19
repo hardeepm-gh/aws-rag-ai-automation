@@ -1,4 +1,3 @@
-variable "ami_id"    { type = string }
-variable "subnet_id" { type = string }
-variable "vpc_id"    { type = string }
-variable "env"       { type = string }
+variable "env" {}
+variable "subnet_id" {}
+variable "security_group_id" {}

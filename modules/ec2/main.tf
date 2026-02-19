@@ -1,33 +1,26 @@
+data "aws_ami" "latest_amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
 resource "aws_instance" "this" {
-  ami                    = var.ami_id
+  ami                    = data.aws_ami.latest_amazon_linux.id
   instance_type          = "t2.micro"
   subnet_id              = var.subnet_id
-  # Reference the resource in this file, NOT a variable
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  vpc_security_group_ids = [var.security_group_id] # Passed from root
 
-  tags = {
-    Name = "${var.env}-web-server"
-  }
-}
-
-resource "aws_security_group" "web_sg" {
-  name   = "${var.env}-web-sg"
-  vpc_id = var.vpc_id
-  # ... (ingress/egress rules)
-}
-
-# resource "aws_security_group" "web_sg" {
- # name        = "web-server-sg"
-  # description = "Allow HTTP inbound traffic"
-  # vpc_id      = var.vpc_id
-
-  
-  # user_data = <<-EOF
+  user_data = <<-EOF
               #!/bin/bash
-              # echo "Hello from Day 21" > index.html
-              # nohup python3 -m http.server 80 &
-              # EOF
+              yum update -y
+              yum install -y httpd
+              systemctl start httpd
+              systemctl enable httpd
+              echo "<h1>Success! Day 24 Infrastructure is Live</h1>" > /var/www/html/index.html
+              EOF
 
-  # tags = {
-   #  Name = "${var.env}-web-server"
-  }
+  tags = { Name = "${var.env}-web-server" }
+}

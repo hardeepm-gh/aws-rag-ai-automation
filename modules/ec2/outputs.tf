@@ -1,8 +1,8 @@
 output "public_ip" {
-  description = "The public IP address of the web server"
-  value       = aws_instance.this.public_ip
+  value = aws_instance.this.public_ip
 }
+
+# This allows the DB to see which security group is allowed to connect to it
 output "security_group_id" {
-  description = "The ID of the security group assigned to the web server"
-  value       = aws_security_group.web_sg.id
+  value = var.security_group_id
 }

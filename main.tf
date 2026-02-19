@@ -1,24 +1,20 @@
-# Provide the Network (The Foundation)
 module "vpc" {
   source   = "./modules/vpc"
-  vpc_cidr = "10.0.0.0/16" # The network range for your VPC
-  env      = "dev"          # The environment name for tagging
+  env      = var.env
+  vpc_cidr = "10.0.0.0/16" # Added this missing argument
 }
 
-# ... (the rest of your module blocks for web_server and db remain the same)
+module "security" {
+  source = "./modules/security"
+  vpc_id = module.vpc.vpc_id
+  env    = var.env
+}
 
-# 1. Provide the Network (The Foundation)
-# module "vpc" {
-  # source = "./modules/vpc"
-# }
-
-# 2. Provide the Web Server (The Compute Tier)
 module "web_server" {
-  source    = "./modules/ec2"
-  ami_id    = data.aws_ami.latest_amazon_linux.id
-  subnet_id = module.vpc.public_subnet_id
-  vpc_id    = module.vpc.vpc_id
-  env       = "dev"
+  source            = "./modules/ec2"
+  env               = var.env
+  subnet_id         = module.vpc.public_subnet_ids[0]
+  security_group_id = module.security.web_sg_id 
 }
 
 # 3. Provide the Database (The Data Tier)
@@ -29,8 +25,10 @@ module "db" {
   db_password          = "password123" # In Day 23, we will move this to a secret!
   vpc_id               = module.vpc.vpc_id
   db_subnet_group_name = module.vpc.db_subnet_group_name
-  web_server_sg_id     = module.web_server.security_group_id
+  # db_security_group_id = module.security.db_sg_id
+  web_server_sg_id     = module.security.web_sg_id # Use the security module's output directly!
 }
+
 
 # Data source to find the latest Amazon Linux AMI automatically
 data "aws_ami" "latest_amazon_linux" {
