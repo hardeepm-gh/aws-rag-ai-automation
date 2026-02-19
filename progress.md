@@ -1,5 +1,5 @@
-## Day 23: Security Hardening & Secrets Management
-* **Secrets Manager:** Successfully moved away from hardcoded DB passwords.
-* **Randomization:** Implemented `random_password` resource for high-entropy credentials.
-* **IAM Integration:** Created an IAM Instance Profile to allow EC2 to fetch secrets without static access keys.
-* **Architecture:** Linked the RDS module to the Secrets Manager value for "blind" deployments.
+## Day 24: Modular Networking & Infrastructure "Glue"
+* **VPC Refactoring:** Successfully deployed a custom VPC with multiple public subnets across AZs.
+* **Module Connectivity:** Implemented "Glue" logic to pass Security Group IDs and Subnet IDs between modules.
+* **Security v3:** Resolved dependency violations by decoupling security rules from the EC2 module.
+* **Infrastructure as Code:** Achieved a clean `terraform apply` for a full 3-tier stack (VPC, EC2, RDS).
