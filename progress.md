@@ -1,5 +1,11 @@
-## Day 24: Modular Networking & Infrastructure "Glue"
-* **VPC Refactoring:** Successfully deployed a custom VPC with multiple public subnets across AZs.
-* **Module Connectivity:** Implemented "Glue" logic to pass Security Group IDs and Subnet IDs between modules.
-* **Security v3:** Resolved dependency violations by decoupling security rules from the EC2 module.
-* **Infrastructure as Code:** Achieved a clean `terraform apply` for a full 3-tier stack (VPC, EC2, RDS).
+# 30 Days of Terraform Challenge
+
+## Day 25: The Landing Zone Refactor
+- **Status**: Completed ✅
+- **Key Achievements**:
+    - Refactored monolithic code into four distinct modules: `vpc`, `security`, `ec2`, and `alb`.
+    - Implemented an Application Load Balancer (ALB) to handle incoming traffic.
+    - Resolved complex state conflicts using `terraform state rm` and `terraform import`.
+    - Verified end-to-end connectivity with a "Healthy" target group status.
+- **Current Architecture**: Modular Landing Zone with ALB Front-End.
+- **Next Up**: Day 26 - Auto Scaling Groups (ASG) for High Availability.
