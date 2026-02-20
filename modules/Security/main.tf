@@ -1,7 +1,7 @@
-resource "aws_security_group" "web_sg" {
-  name        = "${var.env}-web-sg-v3"
-  description = "Allow HTTP inbound traffic"
-  vpc_id      = var.vpc_id
+# TIER 1: ALB Security Group
+resource "aws_security_group" "alb_sg" {
+  name   = "${var.env}-alb-sg"
+  vpc_id = var.vpc_id
 
   ingress {
     from_port   = 80
@@ -18,20 +18,16 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-output "web_sg_id" {
-  value = aws_security_group.web_sg.id
-}
-
-# Add this to your existing security main.tf
-resource "aws_security_group" "db_sg" {
-  name        = "${var.env}-db-sg"
-  vpc_id      = var.vpc_id
+# TIER 2: Web Server Security Group
+resource "aws_security_group" "web_sg" {
+  name   = "${var.env}-web-sg"
+  vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 3306
-    to_port         = 3306
+    from_port       = 80
+    to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.web_sg.id] # Only the web server can talk to the DB
+    security_groups = [aws_security_group.alb_sg.id] # Allows ALB Health Checks
   }
 
   egress {

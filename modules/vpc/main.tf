@@ -2,7 +2,7 @@ resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags = { Name = "${var.env}-vpc" }
+  tags                 = { Name = "${var.env}-vpc" }
 }
 
 # 1. The Gateway (The Door)
@@ -45,8 +45,8 @@ resource "aws_route_table" "public" {
 
 # 4. The Association (Applying instructions to the Room)
 #resource "aws_route_table_association" "public" {
-  # subnet_id      = aws_subnet.this.id
-  #route_table_id = aws_route_table.public.id
+# subnet_id      = aws_subnet.this.id
+#route_table_id = aws_route_table.public.id
 # }
 # ... (your existing VPC and Subnet resources)
 
@@ -54,4 +54,4 @@ resource "aws_db_subnet_group" "main" {
   name       = "main"
   subnet_ids = aws_subnet.public[*].id # Uses all public subnets created in this module
 }
- 
+

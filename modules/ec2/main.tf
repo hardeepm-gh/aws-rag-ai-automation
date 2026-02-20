@@ -1,17 +1,8 @@
-data "aws_ami" "latest_amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-}
-
 resource "aws_instance" "this" {
-  ami                    = data.aws_ami.latest_amazon_linux.id
-  instance_type          = "t2.micro"
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
   subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id] # Passed from root
+  vpc_security_group_ids = [var.security_group_id]
 
   user_data = <<-EOF
               #!/bin/bash
@@ -19,7 +10,7 @@ resource "aws_instance" "this" {
               yum install -y httpd
               systemctl start httpd
               systemctl enable httpd
-              echo "<h1>Success! Day 24 Infrastructure is Live</h1>" > /var/www/html/index.html
+              echo "<h1>Success! Day 25 Infrastructure is Healthy</h1>" > /var/www/html/index.html
               EOF
 
   tags = { Name = "${var.env}-web-server" }

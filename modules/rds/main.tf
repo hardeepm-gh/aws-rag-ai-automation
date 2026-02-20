@@ -8,10 +8,10 @@ resource "aws_db_instance" "this" {
   password             = var.db_password
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot  = true
-  
+
   # This uses the subnet group created in your VPC module
   db_subnet_group_name = var.db_subnet_group_name
-  
+
   # This attaches the DB Security Group
   vpc_security_group_ids = [aws_security_group.db_sg.id]
 }
@@ -22,9 +22,9 @@ resource "aws_security_group" "db_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
     # This is the MAGIC: It only allows the web server SG to talk to it
     security_groups = [var.web_server_sg_id]
   }
