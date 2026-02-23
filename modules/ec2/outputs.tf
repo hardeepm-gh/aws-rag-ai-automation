@@ -1,12 +1,5 @@
-output "instance_id" {
-  value = aws_instance.this.id
+output "asg_name" {
+  value = aws_autoscaling_group.this.name
 }
 
-output "public_ip" {
-  value = aws_instance.this.public_ip
-}
-
-# This allows the DB to see which security group is allowed to connect to it
-output "security_group_id" {
-  value = var.security_group_id
-}
+# Delete the old public_ip and instance_id outputs as they don't apply to a group of servers

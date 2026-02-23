@@ -1,17 +1,41 @@
-resource "aws_instance" "this" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
+resource "aws_launch_template" "this" {
+  name_prefix   = "${var.env}-tpl-"
+  image_id      = var.ami_id
+  instance_type = var.instance_type
 
-  user_data = <<-EOF
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [var.web_sg_id]
+  }
+
+user_data = base64encode(<<-EOF
               #!/bin/bash
-              yum update -y
-              yum install -y httpd
+              sleep 30
+              dnf update -y
+              dnf install -y httpd
               systemctl start httpd
               systemctl enable httpd
-              echo "<h1>Success! Day 25 Infrastructure is Healthy</h1>" > /var/www/html/index.html
+              echo "<h1>Day 26: High Availability Fixed</h1>" > /var/www/html/index.html
               EOF
+  )
+}
 
-  tags = { Name = "${var.env}-web-server" }
+
+resource "aws_autoscaling_group" "this" {
+  desired_capacity    = 2
+  max_size            = 3
+  min_size            = 1
+  vpc_zone_identifier = var.public_subnets
+  target_group_arns   = [var.target_group_arn]
+
+  launch_template {
+    id      = aws_launch_template.this.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.env}-web-asg"
+    propagate_at_launch = true
+  }
 }
