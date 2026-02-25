@@ -1,9 +1,5 @@
-variable "db_name" { type = string }
-variable "db_username" { type = string }
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-variable "vpc_id" { type = string }
-variable "db_subnet_group_name" { type = string }
-variable "web_server_sg_id" { type = string }
+variable "env" {}
+variable "vpc_id" {}
+variable "private_subnets" { type = list(string) }
+variable "db_password" { sensitive = true }
+variable "db_sg_id" {} # Make sure this matches the name in root main.tf

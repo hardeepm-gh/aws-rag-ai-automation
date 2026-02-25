@@ -16,3 +16,4 @@ __pycache__/
 ai_env/
 .terraform/
 *.tfstate*
+*.tfvars

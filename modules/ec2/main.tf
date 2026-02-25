@@ -1,25 +1,35 @@
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+}
 resource "aws_launch_template" "this" {
   name_prefix   = "${var.env}-tpl-"
   image_id      = var.ami_id
   instance_type = var.instance_type
 
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [var.web_sg_id]
-  }
+  vpc_security_group_ids = [var.web_sg_id]
 
-user_data = base64encode(<<-EOF
-              #!/bin/bash
-              sleep 30
-              dnf update -y
-              dnf install -y httpd
-              systemctl start httpd
-              systemctl enable httpd
-              echo "<h1>Day 26: High Availability Fixed</h1>" > /var/www/html/index.html
-              EOF
+  # Ensure user_data starts here and ends with EOF
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Success! Day 28 Live</h1><p>DB Endpoint: ${var.db_endpoint}</p>" > /var/www/html/index.html
+EOF
   )
 }
 
+# network_interfaces {
+# associate_public_ip_address = true
+# security_groups             = [var.web_sg_id]
+# }
 
 resource "aws_autoscaling_group" "this" {
   desired_capacity    = 2
