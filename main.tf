@@ -48,6 +48,8 @@ module "ec2" {
   # Ensure your subnet mapping is still correct
   public_subnets = module.vpc.private_subnets 
 
+  iam_instance_profile_name = aws_iam_instance_profile.ec2_profile.name
+
   instance_type    = "t3.micro"
   web_sg_id        = module.security.web_sg_id
   target_group_arn = module.alb.target_group_arn
