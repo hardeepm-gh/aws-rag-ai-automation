@@ -24,43 +24,34 @@ module "security" {
   env    = var.env
 }
 
-module "rds" {
-  source          = "./modules/rds"
-  env             = var.env
-  vpc_id          = module.vpc.vpc_id
-  private_subnets = module.vpc.private_subnets
-  db_password     = var.db_password
-  db_sg_id        = module.security.db_sg_id # Now this exists!
+# ✅ Mapping to the specific names your module requires:
+ # web_sg_id      = module.security.ec2_sg_id      # Maps to 'web_sg_id'
+ # public_subnets = module.vpc.private_subnets      # Maps to 'public_subnets'
 
-}
+  # IAM and Load Balancer
+ # iam_instance_profile_name = module.security.iam_instance_profile_name
+ # target_group_arn          = aws_lb_target_group.app_tg.arn
 
-
+# Fix the typo: Change 'mmodule' to 'module'
 module "ec2" {
   source = "./modules/ec2"
-  env    = var.env
 
-  # 1. Provide the VPC ID from the VPC module
-  vpc_id = module.vpc.vpc_id
+  env           = var.env
+  ami_id        = var.ami_id
+  instance_type = var.instance_type
+  vpc_id        = module.vpc.vpc_id
 
-  # 2. Provide the AMI ID (Amazon Linux 2023 in us-east-1)
-  ami_id = "ami-0440d3b780d96b29d" 
-
-  # Ensure your subnet mapping is still correct
+  # ✅ Satisfy the arguments the EC2 module is demanding:
   public_subnets = module.vpc.private_subnets 
+  web_sg_id      = module.security.ec2_sg_id
 
-  iam_instance_profile_name = aws_iam_instance_profile.ec2_profile.name
-
-  instance_type    = "t3.micro"
-  web_sg_id        = module.security.web_sg_id
+  # Ensure these are also included if your module requires them:
+  security_group_id         = module.security.ec2_sg_id
+  private_subnets           = module.vpc.private_subnets
+  iam_instance_profile_name = module.security.iam_instance_profile_name
+  # Correct way: module.<MODULE_NAME>.<OUTPUT_NAME>
   target_group_arn = module.alb.target_group_arn
-  db_endpoint      = module.rds.db_endpoint
-
-  depends_on = [module.alb, module.rds]
 }
-
-
-
-
 module "alb" {
   source         = "./modules/alb"
   env            = var.env
@@ -68,4 +59,8 @@ module "alb" {
   public_subnets = module.vpc.public_subnets
   alb_sg_id      = module.security.alb_sg_id
 }
+
+
+
+
 
