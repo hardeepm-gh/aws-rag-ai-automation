@@ -1,37 +1,37 @@
-📅 Day 30: The Compute & Scaling Breakthrough
+📅 Day 3031: Infrastructure Hardening & Phase 1 Completion
 🎯 Objectives
-Deploy a High-Availability (HA) Web Tier using Terraform.
+Finalize the High-Availability (HA) 3-tier architecture.
 
-Bridge the gap between Networking (VPC) and Compute (ASG).
+Secure the environment using KMS and Secrets Manager.
 
-Implement secure instance management via AWS Systems Manager (SSM).
+Resolve environment drift and "502 Bad Gateway" connectivity issues.
 
 🛠️ Key Achievements
-State Management Mastery: Resolved "EntityAlreadyExists" and "Resource already managed" errors using terraform state rm and terraform import.
+Identity Synchronization: Successfully resolved EntityAlreadyExists errors by importing the aws_iam_instance_profile into the Terraform state.
 
-Cross-Module Communication: Successfully mapped outputs from VPC, Security, and ALB modules as inputs for the EC2 module.
+Secrets Management: Implemented AWS Secrets Manager to store database credentials, moving away from plaintext variables.
 
-Bootstrap Success: Configured a user_data script that successfully installs Apache on instances in private subnets via a NAT Gateway.
+Encryption at Rest: Provisioned a KMS Customer Managed Key (CMK) with automatic rotation enabled to encrypt sensitive data.
 
-Architectural Validation: Verified traffic flow through the Application Load Balancer to private EC2 instances.
+Instance Recovery: Leveraged aws autoscaling start-instance-refresh to recycle the fleet, ensuring all instances assumed the correct IAM roles and passed ALB health checks.
+
+Verified Connectivity: Confirmed public-to-private traffic flow via the ALB URL: Success from ip-10-0-1-249.ec2.internal.
 
 🧩 Technical Challenges Overcome
-IAM Instance Profile Conflict: Handled the mismatch between local Terraform state and remote AWS resources.
+The 502 Bad Gateway: Diagnosed that the ALB was failing to communicate with instances after an IAM profile import. Solved via an ASG Instance Refresh.
 
-Modular Logic: Debugged the "Missing Required Argument" errors by standardizing variable names across the root and child modules.
+IAM Permissions: Correctly identified that the EC2 Instance Role follows the Principle of Least Privilege and should not have permissions to manage its own Auto Scaling Group.
 
-ALB Target Registration: Fixed the empty target group issue by correctly linking the ASG to the ALB Target Group ARN.
+Cross-Module Dependencies: Linked the Security module's KMS outputs to the Secrets Manager resource for a hardened security posture.
 
 💡 SAA-C03 Insights Gained
-Security Group Chaining: Learned that the most secure way to allow traffic is to reference the Source Security Group ID (ALB SG) rather than an IP range.
+State Management: Learned that terraform import is the primary tool for reconciling "Reality vs. Code" when resources already exist in AWS.
 
-Statefulness: Confirmed Security Groups allow return traffic automatically, simplifying private subnet communication.
+Health Checks: Understood that a 502 error is specifically an ALB-to-Instance communication failure, often solved by checking Security Groups or Instance Health.
 
-SSM vs SSH: Understood why AWS recommends SSM over Bastion hosts (no port 22 exposure, easier IAM-based auditing).
+Secrets vs. Parameter Store: Implemented Secrets Manager specifically for the benefit of future Secret Rotation (a key exam topic).
 
-📍 Current Status
-VPC Layer: 100%
+📍 Project Status
+Phase 1 (Infrastructure Foundation): 100% COMPLETE ✅
 
-Security Layer: 100%
-
-Compute/ALB Layer: 100% (Verified Live)
+Phase 2 (DevSecOps & Containers): Kicking off Monday, March 1st.
